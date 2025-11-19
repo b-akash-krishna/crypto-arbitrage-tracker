@@ -1,0 +1,141 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from './context/AuthContext'
+import Link from 'next/link'
+import { motion } from 'framer-motion'
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
+  const { login } = useAuth()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      await login(email, password)
+      router.push('/dashboard')
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-96 h-96 bg-neon-cyan opacity-10 blur-3xl rounded-full animate-float"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-neon-purple opacity-10 blur-3xl rounded-full animate-float" style={{ animationDelay: '2s' }}></div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-md"
+      >
+        <div className="backdrop-blur-xl bg-dark-800 bg-opacity-50 border border-neon-cyan border-opacity-20 rounded-2xl p-8 shadow-2xl">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8 text-center"
+          >
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink bg-clip-text text-transparent mb-2">
+              PrimeTrade AI
+            </h1>
+            <p className="text-gray-400">Crypto Arbitrage Tracker</p>
+          </motion.div>
+
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-6 p-4 bg-red-500 bg-opacity-20 border border-red-500 border-opacity-50 rounded-lg text-red-300 text-sm"
+            >
+              {error}
+            </motion.div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-dark-700 bg-opacity-50 border border-neon-cyan border-opacity-20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan focus:ring-opacity-20 transition duration-300"
+                placeholder="your@email.com"
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-dark-700 bg-opacity-50 border border-neon-cyan border-opacity-20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan focus:ring-opacity-20 transition duration-300"
+                placeholder="••••••••"
+              />
+            </motion.div>
+
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              disabled={loading}
+              className="w-full mt-6 py-3 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-lg font-semibold text-dark-900 hover:shadow-lg hover:shadow-neon-cyan/50 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Logging in...' : 'Login'}
+            </motion.button>
+          </form>
+
+          <div className="my-6 flex items-center">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent to-neon-cyan opacity-20"></div>
+            <span className="px-4 text-gray-500 text-sm">OR</span>
+            <div className="flex-1 h-px bg-gradient-to-l from-transparent to-neon-purple opacity-20"></div>
+          </div>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-center text-gray-400"
+          >
+            Don&apos;t have an account?{' '}
+            <Link
+              href="/signup"
+              className="text-neon-cyan hover:text-neon-purple transition duration-300 font-semibold"
+            >
+              Sign up here
+            </Link>
+          </motion.p>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
