@@ -45,128 +45,229 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-96 h-96 bg-neon-cyan opacity-10 blur-3xl rounded-full animate-float"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-neon-purple opacity-10 blur-3xl rounded-full animate-float" style={{ animationDelay: '2s' }}></div>
+      {/* Animated background */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(0,217,255,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(168,85,247,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(236,72,153,0.1),transparent_70%)]" />
+      </div>
+
+      {/* Floating particles */}
+      {[...Array(25)].map((_, i) => (
+        <motion.div
+          key={i}
+          className={`absolute w-1 h-1 rounded-full ${i % 3 === 0 ? 'bg-neon-cyan' : i % 3 === 1 ? 'bg-neon-purple' : 'bg-neon-pink'}`}
+          animate={{
+            x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
+            y: [Math.random() * window.innerHeight, Math.random() * window.innerHeight],
+            opacity: [0, 1, 0],
+            scale: [0, 2, 0],
+          }}
+          transition={{
+            duration: Math.random() * 20 + 15,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          style={{
+            left: Math.random() * 100 + '%',
+            top: Math.random() * 100 + '%',
+          }}
+        />
+      ))}
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-full max-w-md"
+        transition={{ duration: 0.8 }}
+        className="w-full max-w-md relative z-10"
       >
-        <div className="backdrop-blur-xl bg-dark-800 bg-opacity-50 border border-neon-cyan border-opacity-20 rounded-2xl p-8 shadow-2xl">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="mb-8 text-center"
-          >
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink bg-clip-text text-transparent mb-2">
-              Join PrimeTrade
-            </h1>
-            <p className="text-gray-400">Create your account</p>
-          </motion.div>
-
-          {error && (
+        <div className="relative group">
+          {/* Glowing border */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink rounded-3xl opacity-50 group-hover:opacity-100 blur-xl transition duration-1000" />
+          
+          {/* Form container */}
+          <div className="relative backdrop-blur-2xl bg-dark-800/70 border border-white/10 rounded-3xl p-10 shadow-2xl">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mb-6 p-4 bg-red-500 bg-opacity-20 border border-red-500 border-opacity-50 rounded-lg text-red-300 text-sm"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mb-8 text-center"
             >
-              {error}
-            </motion.div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-dark-700 bg-opacity-50 border border-neon-cyan border-opacity-20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan focus:ring-opacity-20 transition duration-300"
-                placeholder="your@email.com"
-              />
+              <motion.div
+                animate={{ 
+                  rotate: [0, 10, -10, 0],
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{ duration: 4, repeat: Infinity }}
+                className="text-6xl mb-4"
+              >
+                🌟
+              </motion.div>
+              <h1 className="text-5xl font-black bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink bg-clip-text text-transparent mb-3">
+                Join PrimeTrade
+              </h1>
+              <p className="text-gray-400 text-lg font-medium">Start your trading journey</p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.35 }}
-            >
-              <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-dark-700 bg-opacity-50 border border-neon-cyan border-opacity-20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan focus:ring-opacity-20 transition duration-300"
-                placeholder="username"
-              />
-            </motion.div>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-2xl text-red-300 text-sm backdrop-blur-xl"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">⚠️</span>
+                  <span>{error}</span>
+                </div>
+              </motion.div>
+            )}
 
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-dark-700 bg-opacity-50 border border-neon-cyan border-opacity-20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan focus:ring-opacity-20 transition duration-300"
-                placeholder="••••••••"
-              />
-            </motion.div>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <label className="block text-sm font-bold text-gray-300 mb-2 uppercase tracking-wider">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full px-5 py-3.5 bg-dark-900/80 border border-neon-cyan/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan/50 transition-all duration-300"
+                  placeholder="your@email.com"
+                />
+              </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.45 }}
-            >
-              <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-dark-700 bg-opacity-50 border border-neon-cyan border-opacity-20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan focus:ring-opacity-20 transition duration-300"
-                placeholder="••••••••"
-              />
-            </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <label className="block text-sm font-bold text-gray-300 mb-2 uppercase tracking-wider">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  className="w-full px-5 py-3.5 bg-dark-900/80 border border-neon-purple/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/50 transition-all duration-300"
+                  placeholder="username"
+                />
+              </motion.div>
 
-            <motion.button
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <label className="block text-sm font-bold text-gray-300 mb-2 uppercase tracking-wider">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-5 py-3.5 bg-dark-900/80 border border-neon-pink/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-neon-pink focus:ring-2 focus:ring-neon-pink/50 transition-all duration-300"
+                  placeholder="••••••••"
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <label className="block text-sm font-bold text-gray-300 mb-2 uppercase tracking-wider">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="w-full px-5 py-3.5 bg-dark-900/80 border border-neon-cyan/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan/50 transition-all duration-300"
+                  placeholder="••••••••"
+                />
+              </motion.div>
+
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(168, 85, 247, 0.5)' }}
+                whileTap={{ scale: 0.97 }}
+                type="submit"
+                disabled={loading}
+                className="w-full mt-6 py-4 bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink rounded-xl font-black text-lg text-dark-900 shadow-lg relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span className="relative z-10">
+                  {loading ? (
+                    <div className="flex items-center justify-center gap-3">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-5 h-5 border-2 border-dark-900 border-t-transparent rounded-full"
+                      />
+                      Creating account...
+                    </div>
+                  ) : (
+                    'Create Account'
+                  )}
+                </span>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-neon-purple via-neon-pink to-neon-cyan"
+                  animate={{ x: ['-100%', '100%'] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  style={{ opacity: 0.3 }}
+                />
+              </motion.button>
+            </form>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="text-center text-gray-400 mt-8"
+            >
+              Already have an account?{' '}
+              <Link 
+                href="/" 
+                className="text-neon-cyan hover:text-neon-purple transition-all duration-300 font-bold hover:underline"
+              >
+                Login here
+              </Link>
+            </motion.p>
+
+            {/* Benefits */}
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={loading}
-              className="w-full mt-6 py-3 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-lg font-semibold text-dark-900 hover:shadow-lg hover:shadow-neon-cyan/50 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              transition={{ delay: 0.9 }}
+              className="mt-8 pt-8 border-t border-white/5 space-y-3"
             >
-              {loading ? 'Creating account...' : 'Sign Up'}
-            </motion.button>
-          </form>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="text-center text-gray-400 mt-6"
-          >
-            Already have an account?{' '}
-            <Link href="/" className="text-neon-cyan hover:text-neon-purple transition duration-300 font-semibold">
-              Login here
-            </Link>
-          </motion.p>
+              {[
+                { icon: '✨', text: 'Access real-time arbitrage opportunities' },
+                { icon: '🎯', text: 'AI-powered market analysis' },
+                { icon: '🔐', text: 'Bank-level security' },
+              ].map((benefit, idx) => (
+                <motion.div
+                  key={benefit.text}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1 + idx * 0.1 }}
+                  className="flex items-center gap-3 text-sm text-gray-400"
+                >
+                  <span className="text-2xl">{benefit.icon}</span>
+                  <span>{benefit.text}</span>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
         </div>
       </motion.div>
     </div>
