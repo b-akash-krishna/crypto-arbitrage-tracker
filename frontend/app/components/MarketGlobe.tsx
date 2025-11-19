@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
 
 export function MarketGlobe() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -44,7 +43,11 @@ export function MarketGlobe() {
       })
     }
 
+    let animationId: number
+
     function animate() {
+      if (!ctx || !canvas) return
+
       // Clear canvas
       ctx.fillStyle = 'rgba(15, 15, 30, 0.1)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -52,7 +55,7 @@ export function MarketGlobe() {
       rotation += 0.002
 
       // Update and draw particles
-      particles.forEach((p, idx) => {
+      particles.forEach((p) => {
         // Rotate around origin
         const cosR = Math.cos(rotation)
         const sinR = Math.sin(rotation)
@@ -121,10 +124,16 @@ export function MarketGlobe() {
         }
       }
 
-      requestAnimationFrame(animate)
+      animationId = requestAnimationFrame(animate)
     }
 
     animate()
+
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId)
+      }
+    }
   }, [])
 
   return (
