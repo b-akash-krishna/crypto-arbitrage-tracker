@@ -1,145 +1,159 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useRef, useMemo } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { OrbitControls, Sphere, Stars } from '@react-three/drei'
+import * as THREE from 'three'
 
-export function MarketGlobe() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+function GlowingParticles({ count = 200 }) {
+  const mesh = useRef<THREE.InstancedMesh>(null)
+  const light = useRef<THREE.PointLight>(null)
 
-  useEffect(() => {
-    if (!canvasRef.current) return
+  const dummy = useMemo(() => new THREE.Object3D(), [])
+  const particles = useMemo(() => {
+    const temp = []
+    for (let i = 0; i < count; i++) {
+      const t = Math.random() * 100
+      const factor = 20 + Math.random() * 100
+      const speed = 0.01 + Math.random() / 200
+      const xFactor = -50 + Math.random() * 100
+      const yFactor = -50 + Math.random() * 100
+      const zFactor = -50 + Math.random() * 100
+      temp.push({ t, factor, speed, xFactor, yFactor, zFactor, mx: 0, my: 0 })
+    }
+    return temp
+  }, [count])
 
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+  useFrame((state) => {
+    if (!mesh.current) return
 
-    // Set canvas size
-    canvas.width = canvas.offsetWidth
-    canvas.height = canvas.offsetHeight
+    particles.forEach((particle, i) => {
+      let { t, factor, speed, xFactor, yFactor, zFactor } = particle
+      t = particle.t += speed / 2
+      const a = Math.cos(t) + Math.sin(t * 1) / 10
+      const b = Math.sin(t) + Math.cos(t * 2) / 10
+      const s = Math.cos(t)
 
-    // Animation variables
-    let rotation = 0
-    const particles: Array<{
-      x: number
-      y: number
-      z: number
-      vx: number
-      vy: number
-      vz: number
-      size: number
-      color: string
-    }> = []
+      dummy.position.set(
+        (particle.mx / 10) * a + xFactor + Math.cos((t / 10) * factor) + (Math.sin(t * 1) * factor) / 10,
+        (particle.my / 10) * b + yFactor + Math.sin((t / 10) * factor) + (Math.cos(t * 2) * factor) / 10,
+        (particle.my / 10) * b + zFactor + Math.cos((t / 10) * factor) + (Math.sin(t * 3) * factor) / 10
+      )
+      dummy.scale.set(s, s, s)
+      dummy.rotation.set(s * 5, s * 5, s * 5)
+      dummy.updateMatrix()
 
-    // Create particles
-    for (let i = 0; i < 50; i++) {
-      particles.push({
-        x: (Math.random() - 0.5) * 400,
-        y: (Math.random() - 0.5) * 400,
-        z: (Math.random() - 0.5) * 400,
-        vx: (Math.random() - 0.5) * 2,
-        vy: (Math.random() - 0.5) * 2,
-        vz: (Math.random() - 0.5) * 2,
-        size: Math.random() * 3 + 1,
-        color: Math.random() > 0.5 ? '#00d9ff' : '#a855f7',
-      })
+      mesh.current!.setMatrixAt(i, dummy.matrix)
+    })
+    mesh.current.instanceMatrix.needsUpdate = true
+  })
+
+  return (
+    <>
+      <pointLight ref={light} distance={40} intensity={8} color="#00f3ff" />
+      <instancedMesh ref={mesh} args={[undefined, undefined, count]}>
+        <dodecahedronGeometry args={[0.2, 0]} />
+        <meshPhongMaterial color="#00f3ff" emissive="#bc13fe" emissiveIntensity={0.5} />
+      </instancedMesh>
+    </>
+  )
+}
+
+function ConnectionLines() {
+  const linesRef = useRef<THREE.Group>(null)
+
+  useFrame((state) => {
+    if (linesRef.current) {
+      linesRef.current.rotation.y += 0.001
+      linesRef.current.rotation.x += 0.0005
+    }
+  })
+
+  // Create random connections on a sphere
+  const lines = useMemo(() => {
+    const points = []
+    const radius = 2.5
+    for (let i = 0; i < 20; i++) {
+      const phi = Math.acos(-1 + (2 * i) / 20)
+      const theta = Math.sqrt(20 * Math.PI) * phi
+
+      const x = radius * Math.cos(theta) * Math.sin(phi)
+      const y = radius * Math.sin(theta) * Math.sin(phi)
+      const z = radius * Math.cos(phi)
+
+      points.push(new THREE.Vector3(x, y, z))
     }
 
-    let animationId: number
-
-    function animate() {
-      if (!ctx || !canvas) return
-
-      // Clear canvas
-      ctx.fillStyle = 'rgba(15, 15, 30, 0.1)'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      rotation += 0.002
-
-      // Update and draw particles
-      particles.forEach((p) => {
-        // Rotate around origin
-        const cosR = Math.cos(rotation)
-        const sinR = Math.sin(rotation)
-        const x1 = p.x * cosR - p.z * sinR
-        const z1 = p.x * sinR + p.z * cosR
-
-        // Perspective projection
-        const scale = 400 / (400 + z1)
-        const x2d = (x1 * scale + canvas.width / 2) | 0
-        const y2d = (p.y * scale + canvas.height / 2) | 0
-
-        // Draw particle
-        ctx.fillStyle = p.color
-        ctx.globalAlpha = Math.max(0.1, scale)
-        ctx.beginPath()
-        ctx.arc(x2d, y2d, p.size * scale, 0, Math.PI * 2)
-        ctx.fill()
-
-        // Update position
-        p.x += p.vx
-        p.y += p.vy
-        p.z += p.vz
-
-        // Bounce off walls
-        if (Math.abs(p.x) > 200) p.vx *= -1
-        if (Math.abs(p.y) > 200) p.vy *= -1
-        if (Math.abs(p.z) > 200) p.vz *= -1
-      })
-
-      ctx.globalAlpha = 1
-
-      // Draw connecting lines between close particles
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const p1 = particles[i]
-          const p2 = particles[j]
-          const dist = Math.sqrt(
-            Math.pow(p1.x - p2.x, 2) +
-            Math.pow(p1.y - p2.y, 2) +
-            Math.pow(p1.z - p2.z, 2)
-          )
-
-          if (dist < 150) {
-            const cosR = Math.cos(rotation)
-            const sinR = Math.sin(rotation)
-            const x1_1 = p1.x * cosR - p1.z * sinR
-            const z1_1 = p1.x * sinR + p1.z * cosR
-            const x1_2 = p2.x * cosR - p2.z * sinR
-            const z1_2 = p2.x * sinR + p2.z * cosR
-
-            const scale1 = 400 / (400 + z1_1)
-            const scale2 = 400 / (400 + z1_2)
-
-            const x2d_1 = x1_1 * scale1 + canvas.width / 2
-            const y2d_1 = p1.y * scale1 + canvas.height / 2
-            const x2d_2 = x1_2 * scale2 + canvas.width / 2
-            const y2d_2 = p2.y * scale2 + canvas.height / 2
-
-            ctx.strokeStyle = `rgba(0, 217, 255, ${0.3 * (1 - dist / 150)})`
-            ctx.lineWidth = 1
-            ctx.beginPath()
-            ctx.moveTo(x2d_1, y2d_1)
-            ctx.lineTo(x2d_2, y2d_2)
-            ctx.stroke()
-          }
+    const connections = []
+    for (let i = 0; i < points.length; i++) {
+      for (let j = i + 1; j < points.length; j++) {
+        if (Math.random() > 0.85) { // Only connect some points
+          connections.push([points[i], points[j]])
         }
       }
-
-      animationId = requestAnimationFrame(animate)
     }
-
-    animate()
-
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId)
-      }
-    }
+    return connections
   }, [])
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="w-full h-full rounded-lg"
-    />
+    <group ref={linesRef}>
+      {lines.map((line, i) => (
+        <line key={i}>
+          <bufferGeometry>
+            <bufferAttribute
+              attach="attributes-position"
+              args={[new Float32Array([
+                line[0].x, line[0].y, line[0].z,
+                line[1].x, line[1].y, line[1].z
+              ]), 3]}
+            />
+          </bufferGeometry>
+          <lineBasicMaterial color="#bc13fe" transparent opacity={0.3} />
+        </line>
+      ))}
+    </group>
+  )
+}
+
+function Scene() {
+  return (
+    <>
+      <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.5} />
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 5]} intensity={1} color="#00f3ff" />
+      <pointLight position={[-10, -10, -10]} intensity={1} color="#ff0099" />
+
+      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+
+      {/* Core Sphere */}
+      <Sphere args={[2.2, 64, 64]}>
+        <meshStandardMaterial
+          color="#0a0a16"
+          roughness={0.1}
+          metalness={0.8}
+          wireframe
+          emissive="#1c1c3d"
+          emissiveIntensity={0.2}
+        />
+      </Sphere>
+
+      {/* Inner Glow Sphere */}
+      <Sphere args={[2, 32, 32]}>
+        <meshBasicMaterial color="#00f3ff" transparent opacity={0.05} />
+      </Sphere>
+
+      <GlowingParticles count={100} />
+      <ConnectionLines />
+    </>
+  )
+}
+
+export function MarketGlobe() {
+  return (
+    <div className="w-full h-full">
+      <Canvas camera={{ position: [0, 0, 6], fov: 45 }}>
+        <Scene />
+      </Canvas>
+    </div>
   )
 }

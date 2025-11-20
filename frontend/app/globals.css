@@ -1,46 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --font-primary: 'Outfit', sans-serif;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: #0a0a16;
+  color: #ffffff;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 15, 30, 0.5);
+  background: rgba(10, 10, 22, 0.5);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #00d9ff, #a855f7);
-  border-radius: 4px;
+  background: linear-gradient(to bottom, #00f3ff, #bc13fe);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #a855f7, #ec4899);
+  background: linear-gradient(to bottom, #bc13fe, #ff0099);
 }
 
-/* Glass effect utility */
+/* Enhanced Glass effect utility */
 .glass-card {
-  backdrop-filter: blur(16px);
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(0, 243, 255, 0.1);
 }
 
 /* Glow effects */
 .glow-cyan {
-  box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+  box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
 }
 
 .glow-purple {
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  box-shadow: 0 0 30px rgba(188, 19, 254, 0.2);
 }
 
 /* Animated gradient background */
 .animate-gradient {
   background-size: 200% 200%;
-  animation: gradient 8s ease infinite;
+  animation: gradient 6s ease infinite;
 }
 
 @keyframes gradient {
@@ -54,5 +72,12 @@
 
 /* Smooth transitions */
 * {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Utility for text glow */
+.text-glow {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
