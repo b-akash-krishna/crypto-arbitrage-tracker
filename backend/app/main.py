@@ -12,13 +12,14 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Crypto Arbitrage Tracker API")
 
-# CORS middleware
+# CORS middleware - COMPLETE VERSION
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://crypto-arbitrage-tracker-pi.vercel.app",
+        "https://crypto-arbitrage-tracker-b-akash-krishnas-projects.vercel.app",
         "https://*.vercel.app",
     ],
     allow_credentials=True,

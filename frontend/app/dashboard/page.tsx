@@ -36,8 +36,7 @@ export default function Dashboard() {
   const [newAlertSpread, setNewAlertSpread] = useState(0.5)
   const [showAlertForm, setShowAlertForm] = useState(false)
 
-  const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api` || 'http://localhost:8000/api'
-
+  const API_URL = process.env.NEXT_PUBLIC_API_URL + '/api' || 'http://localhost:8000/api'
 
   useEffect(() => {
     if (!token && !loading) {
