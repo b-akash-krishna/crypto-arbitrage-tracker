@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: primetrade-backend
+    name: primetrade-n-backend
     env: python
     region: oregon
     plan: free
