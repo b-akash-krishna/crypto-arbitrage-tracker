@@ -239,7 +239,7 @@ export default function Dashboard() {
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-cyan to-neon-purple flex items-center justify-center text-xl shadow-lg shadow-neon-cyan/20">
                   🚀
                 </div>
-                <span className="font-bold text-xl tracking-wider">PRIME</span>
+                <span className="font-bold text-xl tracking-wider">PRIME TRADE</span>
               </div>
 
               <div className="flex items-center gap-6">
