@@ -1,13 +1,24 @@
 'use client'
 
 import { useRef, useMemo } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, extend, ReactThreeFiber } from '@react-three/fiber'
 import { OrbitControls, Sphere, Stars } from '@react-three/drei'
 import * as THREE from 'three'
+import { HolographicMaterial } from './materials/HolographicMaterial'
 
-function GlowingParticles({ count = 200 }) {
+extend({ HolographicMaterial })
+
+// Add HolographicMaterial to JSX types
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      holographicMaterial: any
+    }
+  }
+}
+
+function GlowingParticles({ count = 300 }) {
   const mesh = useRef<THREE.InstancedMesh>(null)
-  const light = useRef<THREE.PointLight>(null)
 
   const dummy = useMemo(() => new THREE.Object3D(), [])
   const particles = useMemo(() => {
@@ -49,101 +60,89 @@ function GlowingParticles({ count = 200 }) {
   })
 
   return (
-    <>
-      <pointLight ref={light} distance={40} intensity={8} color="#00f3ff" />
-      <instancedMesh ref={mesh} args={[undefined, undefined, count]}>
-        <dodecahedronGeometry args={[0.2, 0]} />
-        <meshPhongMaterial color="#00f3ff" emissive="#bc13fe" emissiveIntensity={0.5} />
-      </instancedMesh>
-    </>
+    <instancedMesh ref={mesh} args={[undefined, undefined, count]}>
+      <dodecahedronGeometry args={[0.1, 0]} />
+      <meshPhongMaterial color="#00f3ff" emissive="#bc13fe" emissiveIntensity={0.8} />
+    </instancedMesh>
   )
 }
 
-function ConnectionLines() {
-  const linesRef = useRef<THREE.Group>(null)
+function DataArcs() {
+  const groupRef = useRef<THREE.Group>(null)
+
+  // Create random arcs
+  const arcs = useMemo(() => {
+    const curves = []
+    for (let i = 0; i < 15; i++) {
+      const start = new THREE.Vector3(
+        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 4
+      ).normalize().multiplyScalar(2.2)
+
+      const end = new THREE.Vector3(
+        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 4
+      ).normalize().multiplyScalar(2.2)
+
+      const mid = start.clone().add(end).multiplyScalar(1.5)
+
+      const curve = new THREE.QuadraticBezierCurve3(start, mid, end)
+      curves.push(curve)
+    }
+    return curves
+  }, [])
 
   useFrame((state) => {
-    if (linesRef.current) {
-      linesRef.current.rotation.y += 0.001
-      linesRef.current.rotation.x += 0.0005
+    if (groupRef.current) {
+      groupRef.current.rotation.y -= 0.002
     }
   })
 
-  // Create random connections on a sphere
-  const lines = useMemo(() => {
-    const points = []
-    const radius = 2.5
-    for (let i = 0; i < 20; i++) {
-      const phi = Math.acos(-1 + (2 * i) / 20)
-      const theta = Math.sqrt(20 * Math.PI) * phi
-
-      const x = radius * Math.cos(theta) * Math.sin(phi)
-      const y = radius * Math.sin(theta) * Math.sin(phi)
-      const z = radius * Math.cos(phi)
-
-      points.push(new THREE.Vector3(x, y, z))
-    }
-
-    const connections = []
-    for (let i = 0; i < points.length; i++) {
-      for (let j = i + 1; j < points.length; j++) {
-        if (Math.random() > 0.85) { // Only connect some points
-          connections.push([points[i], points[j]])
-        }
-      }
-    }
-    return connections
-  }, [])
-
   return (
-    <group ref={linesRef}>
-      {lines.map((line, i) => (
-        <line key={i}>
-          <bufferGeometry>
-            <bufferAttribute
-              attach="attributes-position"
-              args={[new Float32Array([
-                line[0].x, line[0].y, line[0].z,
-                line[1].x, line[1].y, line[1].z
-              ]), 3]}
-            />
-          </bufferGeometry>
-          <lineBasicMaterial color="#bc13fe" transparent opacity={0.3} />
-        </line>
+    <group ref={groupRef}>
+      {arcs.map((curve, i) => (
+        <mesh key={i}>
+          <tubeGeometry args={[curve, 20, 0.01, 8, false]} />
+          <meshBasicMaterial color={i % 2 === 0 ? "#00f3ff" : "#bc13fe"} transparent opacity={0.6} />
+        </mesh>
       ))}
     </group>
   )
 }
 
 function Scene() {
+  const materialRef = useRef<THREE.ShaderMaterial>(null)
+
+  useFrame((state) => {
+    if (materialRef.current) {
+      materialRef.current.uniforms.time.value = state.clock.getElapsedTime()
+    }
+  })
+
   return (
     <>
-      <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.5} />
+      <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.8} />
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} intensity={1} color="#00f3ff" />
       <pointLight position={[-10, -10, -10]} intensity={1} color="#ff0099" />
 
       <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
 
-      {/* Core Sphere */}
+      {/* Holographic Globe */}
       <Sphere args={[2.2, 64, 64]}>
-        <meshStandardMaterial
-          color="#0a0a16"
-          roughness={0.1}
-          metalness={0.8}
-          wireframe
-          emissive="#1c1c3d"
-          emissiveIntensity={0.2}
-        />
+        {/* @ts-ignore */}
+        <holographicMaterial ref={materialRef} transparent />
       </Sphere>
 
-      {/* Inner Glow Sphere */}
+      {/* Inner Core */}
       <Sphere args={[2, 32, 32]}>
-        <meshBasicMaterial color="#00f3ff" transparent opacity={0.05} />
+        <meshBasicMaterial color="#000000" />
       </Sphere>
 
-      <GlowingParticles count={100} />
-      <ConnectionLines />
+      <GlowingParticles count={200} />
+      {/* <DataArcs /> */}
     </>
   )
 }
@@ -157,3 +156,4 @@ export function MarketGlobe() {
     </div>
   )
 }
+

@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${outfit.className} bg-dark-900 text-white custom-scrollbar`}>
         <AuthProvider>
           <WebSocketProvider>

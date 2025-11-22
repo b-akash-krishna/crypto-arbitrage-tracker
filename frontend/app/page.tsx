@@ -5,16 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from './context/AuthContext'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Canvas } from '@react-three/fiber'
-import { Stars } from '@react-three/drei'
-
-function BackgroundScene() {
-  return (
-    <Canvas camera={{ position: [0, 0, 1] }}>
-      <Stars radius={50} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-    </Canvas>
-  )
-}
+import { Hero3D } from './components/Hero3D'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -43,7 +34,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-dark-900 flex items-center justify-center p-4 relative overflow-hidden">
       {/* 3D Background */}
       <div className="absolute inset-0 z-0">
-        <BackgroundScene />
+        <Hero3D showRings={false} />
       </div>
 
       {/* Animated Gradient Orbs */}

@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 import { SpotlightCard } from '../components/SpotlightCard'
+import { FloatingAsset } from '../components/FloatingAsset'
 import Link from 'next/link'
 
 interface Trade {
@@ -89,14 +90,22 @@ export default function Portfolio() {
     }
 
     const totalValue = trades.reduce((acc, trade) => acc + (trade.quantity * trade.entry_price), 0)
-    const activeTrades = trades.filter(t => t.status === 'OPEN').length
 
     return (
         <div className="min-h-screen bg-dark-900 text-white relative overflow-hidden font-sans">
             {/* Background Elements */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div
+                    className="absolute inset-0 bg-cover bg-center opacity-20"
+                    style={{ backgroundImage: "url('/dashboard-bg.png')" }}
+                />
                 <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-neon-cyan/5 blur-[150px] rounded-full" />
                 <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-neon-purple/5 blur-[150px] rounded-full" />
+
+                {/* Floating 3D Asset */}
+                <div className="absolute top-20 right-[-10%] w-[600px] h-[600px] opacity-50">
+                    <FloatingAsset />
+                </div>
             </div>
 
             {/* Navigation */}
@@ -131,12 +140,14 @@ export default function Portfolio() {
 
                 <div className="flex justify-between items-center mb-8">
                     <h2 className="text-2xl font-bold">Active Trades</h2>
-                    <button
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => setShowTradeForm(true)}
-                        className="px-4 py-2 bg-neon-cyan text-dark-900 font-bold rounded-lg hover:bg-white transition-colors shadow-lg shadow-neon-cyan/20"
+                        className="px-6 py-2 bg-neon-cyan text-dark-900 font-bold rounded-lg hover:bg-white transition-colors shadow-lg shadow-neon-cyan/20"
                     >
                         + New Trade
-                    </button>
+                    </motion.button>
                 </div>
 
                 <AnimatePresence>
@@ -204,58 +215,71 @@ export default function Portfolio() {
                 </AnimatePresence>
 
                 <div className="grid grid-cols-1 gap-4">
-                    {trades.length === 0 ? (
-                        <div className="text-center py-20 glass-card rounded-2xl border-dashed border-white/10">
-                            <div className="text-4xl mb-4 opacity-30">💼</div>
-                            <p className="text-gray-400">No active trades found</p>
-                            <button
-                                onClick={() => setShowTradeForm(true)}
-                                className="mt-4 text-neon-cyan hover:underline"
+                    <AnimatePresence mode="popLayout">
+                        {trades.length === 0 ? (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-center py-20 glass-card rounded-2xl border-dashed border-white/10"
                             >
-                                Start Trading
-                            </button>
-                        </div>
-                    ) : (
-                        trades.map((trade) => (
-                            <SpotlightCard key={trade.id} className="p-6">
-                                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                                    <div className="flex items-center gap-4 w-full md:w-auto">
-                                        <div className="w-12 h-12 rounded-full bg-dark-900 flex items-center justify-center border border-white/10 text-lg font-bold text-white">
-                                            {trade.crypto_pair.split('/')[0]}
-                                        </div>
-                                        <div>
-                                            <h4 className="text-lg font-bold text-white">{trade.crypto_pair}</h4>
-                                            <p className="text-xs text-gray-400">ID: #{trade.id}</p>
-                                        </div>
-                                    </div>
+                                <div className="text-4xl mb-4 opacity-30">💼</div>
+                                <p className="text-gray-400">No active trades found</p>
+                                <button
+                                    onClick={() => setShowTradeForm(true)}
+                                    className="mt-4 text-neon-cyan hover:underline"
+                                >
+                                    Start Trading
+                                </button>
+                            </motion.div>
+                        ) : (
+                            trades.map((trade, idx) => (
+                                <motion.div
+                                    key={trade.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: idx * 0.1 }}
+                                >
+                                    <SpotlightCard className="p-6">
+                                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                                            <div className="flex items-center gap-4 w-full md:w-auto">
+                                                <div className="w-12 h-12 rounded-full bg-dark-900 flex items-center justify-center border border-white/10 text-lg font-bold text-white">
+                                                    {trade.crypto_pair.split('/')[0]}
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-lg font-bold text-white">{trade.crypto_pair}</h4>
+                                                    <p className="text-xs text-gray-400">ID: #{trade.id}</p>
+                                                </div>
+                                            </div>
 
-                                    <div className="grid grid-cols-3 gap-8 w-full md:w-auto text-center md:text-left">
-                                        <div>
-                                            <p className="text-xs text-gray-500 mb-1">Entry Price</p>
-                                            <p className="font-mono text-white">${trade.entry_price.toFixed(2)}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-gray-500 mb-1">Quantity</p>
-                                            <p className="font-mono text-white">{trade.quantity}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-gray-500 mb-1">Total Value</p>
-                                            <p className="font-mono text-neon-cyan">${(trade.entry_price * trade.quantity).toFixed(2)}</p>
-                                        </div>
-                                    </div>
+                                            <div className="grid grid-cols-3 gap-8 w-full md:w-auto text-center md:text-left">
+                                                <div>
+                                                    <p className="text-xs text-gray-500 mb-1">Entry Price</p>
+                                                    <p className="font-mono text-white">${trade.entry_price.toFixed(2)}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-gray-500 mb-1">Quantity</p>
+                                                    <p className="font-mono text-white">{trade.quantity}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-gray-500 mb-1">Total Value</p>
+                                                    <p className="font-mono text-neon-cyan">${(trade.entry_price * trade.quantity).toFixed(2)}</p>
+                                                </div>
+                                            </div>
 
-                                    <div className="w-full md:w-auto text-right">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${trade.status === 'OPEN'
-                                                ? 'bg-neon-green/10 text-neon-green border border-neon-green/20'
-                                                : 'bg-gray-800 text-gray-400'
-                                            }`}>
-                                            {trade.status}
-                                        </span>
-                                    </div>
-                                </div>
-                            </SpotlightCard>
-                        ))
-                    )}
+                                            <div className="w-full md:w-auto text-right">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${trade.status === 'OPEN'
+                                                    ? 'bg-neon-green/10 text-neon-green border border-neon-green/20'
+                                                    : 'bg-gray-800 text-gray-400'
+                                                    }`}>
+                                                    {trade.status}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </SpotlightCard>
+                                </motion.div>
+                            ))
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </div>
