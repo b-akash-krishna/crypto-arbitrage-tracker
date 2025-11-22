@@ -91,10 +91,11 @@ Visit `http://localhost:3000` to view the application.
 
 ## 👨‍💻 Author
 **B Akash Krishna**
-- Mail: [b.akashkrishna27@gmail.com](b.akashkrishna27@gmail.com)
+- Mail: [b.akashkrishna27@gmail.com](mailto:b.akashkrishna27@gmail.com)
 - LinkedIn: [https://www.linkedin.com/in/b-akash-krishna/](https://www.linkedin.com/in/b-akash-krishna/)
 - GitHub: [https://github.com/b-akash-krishna](https://github.com/b-akash-krishna)
 
 ---
 
 *Built for the PrimeTrade Internship Program*
+
