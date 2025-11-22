@@ -11,7 +11,7 @@ pydantic-core==2.27.1
 email-validator==2.1.0
 requests==2.31.0
 python-dotenv
-ccxt==1.0.0
+ccxt>=4.0.0
 yfinance
 scikit-learn
 pandas
