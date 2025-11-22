@@ -6,11 +6,22 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# For development, we'll use SQLite (change to PostgreSQL for production)
-SQLALCHEMY_DATABASE_URL = "sqlite:///./crypto_arbitrage.db"
+# Use PostgreSQL in production (via DATABASE_URL env var), SQLite in development
+SQLALCHEMY_DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "sqlite:///./crypto_arbitrage.db"
+)
+
+# Fix for Render's PostgreSQL URL format (postgres:// -> postgresql://)
+if SQLALCHEMY_DATABASE_URL and SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# SQLite requires check_same_thread=False, PostgreSQL doesn't
+connect_args = {"check_same_thread": False} if "sqlite" in SQLALCHEMY_DATABASE_URL else {}
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    SQLALCHEMY_DATABASE_URL, 
+    connect_args=connect_args
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

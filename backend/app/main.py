@@ -15,10 +15,13 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Crypto Arbitrage Tracker API")
 
-# CORS middleware
+# CORS middleware - configurable for production
+import os
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all for development
+    allow_origins=[FRONTEND_URL, "https://crypto-arbitrage-tracker-pi.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
